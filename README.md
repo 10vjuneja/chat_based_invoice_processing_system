@@ -48,7 +48,7 @@ If needed, you can clear all tables in the db by running
 ### Show/Edit Invoices
 - You can say 'show invoices' or 'show last N invoices' or similar to view a list of already processed invoices. When N is not specified, last 10 invoices are shown by default.
 - You can sort the invoices by date, amount, and vendor.
-- You can edit or download each individual invoice.
+- You can edit or download each individual invoice by selecting them from the invoice table.
 
 ### Show Token Usage Stats
 - You can say 'show token usage' or similar to view the token usage statistics.

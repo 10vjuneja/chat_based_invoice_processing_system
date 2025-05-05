@@ -1,0 +1,1 @@
+ALTER TABLE `PromptCache` ADD COLUMN `savedTokens` integer DEFAULT 0; 

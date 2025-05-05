@@ -58,6 +58,7 @@
         --sidebar-border: 220 13% 91%;
         --sidebar-ring: 217.2 91.2% 59.8%;
     }
+
     .dark {
         --background: 240 10% 3.9%;
         --foreground: 0 0% 98%;
@@ -146,7 +147,7 @@
     @apply bg-background dark:bg-zinc-800 outline-none selection:bg-zinc-900 !important;
 }
 
-.ͼo.cm-focused > .cm-scroller > .cm-selectionLayer .cm-selectionBackground,
+.ͼo.cm-focused>.cm-scroller>.cm-selectionLayer .cm-selectionBackground,
 .ͼo.cm-selectionBackground,
 .ͼo.cm-content::selection {
     @apply bg-zinc-200 dark:bg-zinc-900 !important;
@@ -175,4 +176,19 @@
 
 .suggestion-highlight {
     @apply bg-blue-200 hover:bg-blue-300 dark:hover:bg-blue-400/50 dark:text-blue-50 dark:bg-blue-500/40;
+}
+
+.fill-grid {
+    block-size: 100%;
+    inline-size: 100%;
+}
+
+.rdg {
+    --rdg-background-color: hsl(var(--background));
+    --rdg-header-background-color: hsl(var(--muted));
+    --rdg-row-hover-background-color: hsl(var(--muted));
+    --rdg-selection-color: hsl(var(--primary));
+    --rdg-border-color: hsl(var(--border));
+    --rdg-color: hsl(var(--foreground));
+    --rdg-header-color: hsl(var(--foreground));
 }

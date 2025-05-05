@@ -1,11 +1,11 @@
-CREATE TABLE `Chat` (
+CREATE TABLE IF NOT EXISTS `Chat` (
 	`id` text PRIMARY KEY NOT NULL,
 	`createdAt` integer NOT NULL,
 	`title` text NOT NULL,
 	`visibility` text DEFAULT 'private' NOT NULL
 );
 --> statement-breakpoint
-CREATE TABLE `Document` (
+CREATE TABLE IF NOT EXISTS `Document` (
 	`id` text NOT NULL,
 	`createdAt` integer NOT NULL,
 	`title` text NOT NULL,
@@ -14,7 +14,7 @@ CREATE TABLE `Document` (
 	PRIMARY KEY(`id`, `createdAt`)
 );
 --> statement-breakpoint
-CREATE TABLE `Message` (
+CREATE TABLE IF NOT EXISTS `Message` (
 	`id` text PRIMARY KEY NOT NULL,
 	`chatId` text NOT NULL,
 	`role` text NOT NULL,
@@ -23,7 +23,7 @@ CREATE TABLE `Message` (
 	FOREIGN KEY (`chatId`) REFERENCES `Chat`(`id`) ON UPDATE no action ON DELETE no action
 );
 --> statement-breakpoint
-CREATE TABLE `Suggestion` (
+CREATE TABLE IF NOT EXISTS `Suggestion` (
 	`id` text PRIMARY KEY NOT NULL,
 	`documentId` text NOT NULL,
 	`documentCreatedAt` integer NOT NULL,
@@ -35,7 +35,7 @@ CREATE TABLE `Suggestion` (
 	FOREIGN KEY (`documentId`,`documentCreatedAt`) REFERENCES `Document`(`id`,`createdAt`) ON UPDATE no action ON DELETE no action
 );
 --> statement-breakpoint
-CREATE TABLE `Vote` (
+CREATE TABLE IF NOT EXISTS `Vote` (
 	`chatId` text NOT NULL,
 	`messageId` text NOT NULL,
 	`isUpvoted` integer NOT NULL,

@@ -1,74 +1,90 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { auth } from '@/app/(auth)/auth';
+import fs from 'fs';
+import path from 'path';
 
 // Use Blob instead of File since File is not available in Node.js environment
 const FileSchema = z.object({
-  file: z
-    .instanceof(Blob)
-    .refine((file) => file.size <= 5 * 1024 * 1024, {
-      message: 'File size should be less than 5MB',
-    })
-    // Update the file type based on the kind of files you want to accept
-    .refine((file) => ['image/jpeg', 'image/png'].includes(file.type), {
-      message: 'File type should be JPEG or PNG',
-    }),
+    file: z
+        .instanceof(Blob)
+        .refine((file) => file.size <= 5 * 1024 * 1024, {
+            message: 'File size should be less than 5MB',
+        })
+        // Update the file type based on the kind of files you want to accept
+        .refine((file) => ['image/jpeg', 'image/png', 'application/pdf'].includes(file.type), {
+            message: 'File type should be JPEG or PNG or PDF',
+        }),
 });
 
 export async function POST(request: Request) {
-  const session = await auth();
+    const session = await auth();
 
-  if (!session) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-
-  if (request.body === null) {
-    return new Response('Request body is empty', { status: 400 });
-  }
-
-  try {
-    const formData = await request.formData();
-    const file = formData.get('file') as Blob;
-
-    if (!file) {
-      return NextResponse.json({ error: 'No file uploaded' }, { status: 400 });
+    if (!session) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    const validatedFile = FileSchema.safeParse({ file });
-
-    if (!validatedFile.success) {
-      const errorMessage = validatedFile.error.errors
-        .map((error) => error.message)
-        .join(', ');
-
-      return NextResponse.json({ error: errorMessage }, { status: 400 });
+    if (request.body === null) {
+        return new Response('Request body is empty', { status: 400 });
     }
-
-    // Get filename from formData since Blob doesn't have name property
-    const filename = (formData.get('file') as File).name;
-    const fileBuffer = await file.arrayBuffer();
-    const buffer = Buffer.from(fileBuffer);
 
     try {
-      // Generate unique filename with timestamp
-      const timestamp = Date.now();
-      const uniqueFilename = `${timestamp}-${filename}`;
+        const formData = await request.formData();
+        const file = formData.get('file') as Blob;
 
-      // Create data URL for immediate preview
-      const dataURL = `data:${file.type};base64,${buffer.toString('base64')}`;
+        if (!file) {
+            return NextResponse.json({ error: 'No file uploaded' }, { status: 400 });
+        }
 
-      return NextResponse.json({
-        url: dataURL,
-        pathname: `/uploads/${uniqueFilename}`,
-        contentType: file.type,
-      });
+        const validatedFile = FileSchema.safeParse({ file });
+
+        if (!validatedFile.success) {
+            const errorMessage = validatedFile.error.errors
+                .map((error) => error.message)
+                .join(', ');
+
+            return NextResponse.json({ error: errorMessage }, { status: 400 });
+        }
+
+        // Get filename from formData since Blob doesn't have name property
+        const filename = (formData.get('file') as File).name;
+        const fileBuffer = await file.arrayBuffer();
+        const buffer = Buffer.from(fileBuffer);
+
+        try {
+            // Generate unique filename with timestamp
+            const timestamp = Date.now();
+            const uniqueFilename = `${timestamp}-${filename}`;
+
+            // Create data URL for immediate preview
+            const dataURL = `data:${file.type};base64,${buffer.toString('base64')}`;
+
+            // Define the uploads folder path
+            const uploadsFolder = path.join(process.cwd(), 'uploads');
+
+            // Ensure the uploads folder exists
+            if (!fs.existsSync(uploadsFolder)) {
+                fs.mkdirSync(uploadsFolder, { recursive: true });
+            }
+
+            // Save the file to the uploads folder
+            const filePath = path.join(uploadsFolder, uniqueFilename);
+            fs.writeFileSync(filePath, buffer);
+            console.log(`File saved to ${filePath}`);
+
+
+            return NextResponse.json({
+                url: dataURL,
+                pathname: `/uploads/${uniqueFilename}`,
+                contentType: file.type,
+            });
+        } catch (error) {
+            return NextResponse.json({ error: 'Upload failed' }, { status: 500 });
+        }
     } catch (error) {
-      return NextResponse.json({ error: 'Upload failed' }, { status: 500 });
+        return NextResponse.json(
+            { error: 'Failed to process request' },
+            { status: 500 },
+        );
     }
-  } catch (error) {
-    return NextResponse.json(
-      { error: 'Failed to process request' },
-      { status: 500 },
-    );
-  }
 }
